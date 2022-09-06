@@ -55,14 +55,15 @@ struct PlaneError {
     PlaneError(double x, double y, double z, double weight=1)
         : x(x), y(y), z(z), weight(weight) { }
 
-    template <typename T> bool operator()(const T* const X, T* residuals) const {
+    template <typename T>
+        bool operator()(const T* const w,
+                T* residuals) const {
             // TODO START
             // The error is the difference between the predicted and a position.
             // Update this value to make it a proper measurement error
             // Check the CERES optimizer web-page for the documentation: 
             // http://homes.cs.washington.edu/~sagarwal/ceres-solver/stable/tutorial.html#chapter-tutorial
-            residuals[0] = z - (X[0]*x + X[1]*y + X[2]);
-            //residuals[0] = T(0.0);
+            residuals[0] = z - (w[0]*x + w[1]*y + w[2]);
 
             // END OF TODO
             return true;
@@ -87,7 +88,6 @@ class FloorPlaneRegression {
     protected: // ROS Callbacks
 
         void pc_callback(const sensor_msgs::PointCloud2ConstPtr msg) {
-            ROS_INFO("Callback is being called");
             // Receive the point cloud and convert it to the right format
             pcl::PointCloud<pcl::PointXYZ> temp;
             pcl::fromROSMsg(*msg, temp);
@@ -119,12 +119,11 @@ class FloorPlaneRegression {
                 ceres::LossFunction* loss_function;
                 ceres::CostFunction *cost_function;
                 loss_function = FLAGS_robustify ? new ceres::HuberLoss(1.0) : NULL;
-                //loss_function = new ceres::HuberLoss(1.0);
                 // TODO START
                 // Use the PlaneError defined above to build an error term for
                 // the ceres optimiser (see documentation link above)
                 cost_function = 
-                    new ceres::AutoDiffCostFunction<PlaneError, 1, 1>(
+                    new ceres::AutoDiffCostFunction<PlaneError, 1, 3>(
                         new PlaneError(T.x, T.y, T.z, 1));
                 // END OF TODO
                 // This cost function is then added to the optimisation
