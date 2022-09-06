@@ -19,7 +19,8 @@ class FloorPlaneRegression {
         ros::NodeHandle nh_;
         std::string base_frame_;
         double max_range_;
-
+        double cumulativeTime = 0;
+        double nbCalls = 0;        
         pcl::PointCloud<pcl::PointXYZ> lastpc_;
 
     protected: // ROS Callbacks
@@ -57,7 +58,6 @@ class FloorPlaneRegression {
                 // let's store it
                 pidx.push_back(i);
             }
-            
             //
             //
             // TODO START
@@ -86,16 +86,19 @@ class FloorPlaneRegression {
 
                 B(i,0) = z;
             }
+            ros::WallTime begin = ros::WallTime::now();
             // Eigen operation on matrices are very natural:
             Eigen::JacobiSVD<Eigen::MatrixXf> svd(A, Eigen::ComputeThinU | Eigen::ComputeThinV);
             Eigen::MatrixXf X = svd.solve(B);
             //Eigen::MatrixXf X = A.colPivHouseholderQr().solve(B);
             // Details on linear solver can be found on 
             // http://eigen.tuxfamily.org/dox-devel/group__TutorialLinearAlgebra.html
-            
+            double wallTime  = (ros::WallTime::now() - begin).toSec();
+            cumulativeTime += wallTime;
+            nbCalls++;
+            double currentAvg = wallTime/nbCalls;
             // Assuming the result is computed in vector X
-            ROS_INFO("Extracted floor plane: z = %.2fx + %.2fy + %.2f",
-                    X(0),X(1),X(2));
+            ROS_INFO("Extracted floor plane: z = %.2fx + %.2fy + %.2f. Current average %.9fs", X(0),X(1),X(2), currentAvg);
 
             // END OF TODO
 

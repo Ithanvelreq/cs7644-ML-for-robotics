@@ -39,7 +39,7 @@ DEFINE_string(sparse_linear_algebra_library, "suite_sparse",
 
 DEFINE_string(ordering, "automatic", "Options are: automatic, user.");
 
-DEFINE_bool(robustify, false, "Use a robust loss function.");
+DEFINE_bool(robustify, true, "Use a robust loss function.");
 DEFINE_double(eta, 1e-2, "Default value for eta. Eta determines the "
              "accuracy of each linear solve of the truncated newton step. "
              "Changing this parameter can affect solve performance.");
@@ -56,15 +56,16 @@ struct PlaneError {
         : x(x), y(y), z(z), weight(weight) { }
 
     template <typename T>
-        bool operator()(const T* const w,
+        bool operator()(const T* const X,
                 T* residuals) const {
             // TODO START
             // The error is the difference between the predicted and a position.
             // Update this value to make it a proper measurement error
             // Check the CERES optimizer web-page for the documentation: 
             // http://homes.cs.washington.edu/~sagarwal/ceres-solver/stable/tutorial.html#chapter-tutorial
-            residuals[0] = z - (w[0]*x + w[1]*y + w[2]);
-
+            //residuals[0] = T(0.0);
+            // camera[0,1,2] are the angle-axis rotation.
+            residuals[0] = z - (X[0]*x + X[1]*y + X[2]);
             // END OF TODO
             return true;
         }
@@ -81,6 +82,9 @@ class FloorPlaneRegression {
         ros::NodeHandle nh_;
         std::string base_frame_;
         double max_range_;
+        double huberLossParam_ = 0;
+        double cumulativeTime = 0;
+        double nCallback = 0;
 
         pcl::PointCloud<pcl::PointXYZ> lastpc_;
         ceres::Solver::Options options;
@@ -118,26 +122,25 @@ class FloorPlaneRegression {
                 }
                 ceres::LossFunction* loss_function;
                 ceres::CostFunction *cost_function;
-                loss_function = FLAGS_robustify ? new ceres::HuberLoss(1.0) : NULL;
+                loss_function = FLAGS_robustify ? new ceres::HuberLoss(huberLossParam_) : NULL;
                 // TODO START
                 // Use the PlaneError defined above to build an error term for
                 // the ceres optimiser (see documentation link above)
-                cost_function = 
-                    new ceres::AutoDiffCostFunction<PlaneError, 1, 3>(
-                        new PlaneError(T.x, T.y, T.z, 1));
+                cost_function = new ceres::AutoDiffCostFunction<PlaneError, 1, 3 >(new PlaneError(P.x, P.y, P.z));
                 // END OF TODO
                 // This cost function is then added to the optimisation
                 // problem, with X as a parameter
                 problem.AddResidualBlock(cost_function,loss_function,X);
             }
-
+            ros::Time timeCallbackBegin = ros::Time::now();
             // Now we've prepared ceres' solver, we can just run it:
             ceres::Solver::Summary summary;
             ceres::Solve(options, &problem, &summary);
-
+            cumulativeTime += (ros::Time::now()-timeCallbackBegin).toSec();
+            nCallback++;
+            ROS_INFO("Resolution duration : %.9fs",cumulativeTime/nCallback);
             // Assuming the result is computed in vector X
-            ROS_INFO("Extracted floor plane: z = %.2fx + %.2fy + %.2f",
-                    X[0],X[1],X[2]);
+            ROS_INFO("Extracted floor plane: z = %.2fx + %.2fy + %.2f",X[0],X[1],X[2]);
 
             // Same code as the linear regression: build the 3D orientation
             Eigen::Vector3f O,u,v,w;
@@ -178,7 +181,6 @@ class FloorPlaneRegression {
 
             // And publish it
             marker_pub_.publish(m);
-            
         }
 
     public:
@@ -187,6 +189,7 @@ class FloorPlaneRegression {
             // linear regression case
             nh_.param("base_frame",base_frame_,std::string("/body"));
             nh_.param("max_range",max_range_,5.0);
+            nh_.param("huberLossParam",huberLossParam_,5.0);
 
             // Make sure TF is ready
             ros::Duration(0.5).sleep();
@@ -230,5 +233,3 @@ int main(int argc, char * argv[])
     ros::spin();
     return 0;
 }
-
-

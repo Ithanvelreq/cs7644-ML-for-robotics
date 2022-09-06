@@ -4,6 +4,7 @@
       launch-prefix="xterm -e gdb --args"
       <param name="base_frame" value="Hokuyo_sensor" />
       <param name="max_range" value="2.0" />
+      <param name="huberLossParam" value="1000" />
 
       <remap from="/floor_plane_ceres/scans" to="/depth_registered/points"/>
   </node>
