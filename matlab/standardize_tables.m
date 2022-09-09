@@ -1,6 +1,12 @@
 function [cmd_vel_table, out_vel_table] = standardize_tables(path_to_dir_table, train, time_step_seconds, save_tables)
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+%   Path_do_dir: path to the directory that contains the data. Usually "..\\datasets\\system_identification_drone_dataset"
+%   train: True if we want the train dataset, false otherwise
+%   time_step_seconds: Sampling rate for our data. Must be the same for
+%   train and test
+%   save_tables: true if we want the tables to be saved to a csv file
+%   NOTES:
+%   The time step can have a huge impact on the predictions. We must wisely
+%   choose the timestep. What is the sampling rate on ROS?
 if train
     cmd_vel_table_path = path_to_dir_table + "\\cmd_vel_train";
     out_vel_table_path = path_to_dir_table + "\\out_vel_train";
