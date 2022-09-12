@@ -28,10 +28,8 @@ end_time_range = min(out_vel_table.x_time(end), cmd_vel_table.x_time(end));
 time_range = 0:time_step_seconds:end_time_range;
 
 cmd_vel_table = interp1(cmd_vel_table.x_time, cmd_vel_table.field, time_range);
-cmd_vel_table = vertcat(cmd_vel_table, time_range);
 
 out_vel_table = interp1(out_vel_table.x_time, out_vel_table.field, time_range);
-out_vel_table = vertcat(out_vel_table, time_range);
 
 if save_tables
     writetable(cmd_vel_table , new_table_name+"_standardized.csv", 'Delimiter', ',');
