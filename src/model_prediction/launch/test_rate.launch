@@ -1,0 +1,28 @@
+<launch>
+    <node pkg="model_prediction" type="generator.py" name="generator" output="screen" />
+
+    <node pkg="model_prediction" type="model_prediction_rate.py" name="predictor" output="screen" >
+        <param name="rate" value="5"/>
+//        <param name="command_type" value="std_msgs/Float64"/>
+//        <param name="command_field" value="data"/>
+        <param name="command_type" value="geometry_msgs/Twist"/>
+        <param name="command_field" value="linear.x"/>
+        <param name="command_coef_csv" value="0,-0.006855981,-0.007706878,-0.000896709,0.003763374,-0.000163169,-0.00062885,0.019591075,0.032088271
+
+"/>
+//        <param name="state_type" value="std_msgs/Float64"/>
+//        <param name="state_field" value="data"/>
+        <param name="state_type" value="geometry_msgs/Twist"/>
+        <param name="state_field" value="linear.x"/>
+        <param name="state_coef_csv" value="1,-2.158249476,1.815187391,-0.670240295,0.092600862,-0.024067159,-0.030477315,0.224484669,-0.310347303,0.249607237,-0.105176084,-0.031316506,0.042628579
+
+"/>
+
+//        <remap from="/predictor/command" to="/command"/>
+//        <remap from="/predictor/state" to="/state"/>
+	  <remap from="/predictor/command" to="/sim_ros_interface/drone/cmd_vel"/>
+          <remap from="/predictor/state" to="/sim_ros_interface/drone/out_vel"/>
+    </node>
+
+</launch>
+
