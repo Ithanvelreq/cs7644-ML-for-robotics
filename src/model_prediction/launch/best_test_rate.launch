@@ -1,0 +1,14 @@
+<launch>
+    <node pkg="model_prediction" type="generator.py" name="generator" output="screen" />
+    <node pkg="model_prediction" type="model_prediction_rate.py" name="predictor" output="screen" >
+        <param name="rate" value="80.645"/>
+        <param name="command_type" value="geometry_msgs/Twist"/>
+        <param name="command_field" value="linear.x"/>
+        <param name="command_coef_csv" value="0.00008586, -0.00019776, 0.00027644, -0.00018129, 0.00019877, -0.00023495, 0.00011212, -0.000049284"/>
+        <param name="state_type" value="geometry_msgs/Twist"/>
+        <param name="state_field" value="linear.x"/>
+        <param name="state_coef_csv" value="-1.4631, -0.5476, 0.5789, 0.5447, 0.5040, -0.1669, -0.2962, -0.4064, 0.0790, 0.1737"/>
+        <remap from="/predictor/command" to="/sim_ros_interface/drone/cmd_vel"/>
+        <remap from="/predictor/state" to="/sim_ros_interface/drone/out_vel"/>
+    </node>
+</launch>
