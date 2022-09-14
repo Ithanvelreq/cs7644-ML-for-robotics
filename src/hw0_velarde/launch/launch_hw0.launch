@@ -12,5 +12,7 @@
   <param name="axis_angular" value="0" type="int"/>
   <param name="scale_linear" value="0.8" type="double"/>
   <param name="scale_angular" value="0.8" type="double"/>
-  <node pkg="hw0_velarde" type="teleop_joy" name="teleop"/>
+  <node pkg="hw0_velarde" type="teleop_joy" name="teleop">
+    <remap from="/joystic/cmd" to="/sim_ros_interface/drone/cmd_vel"/>
+  </node>
 </launch>
