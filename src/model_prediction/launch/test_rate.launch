@@ -2,17 +2,17 @@
     <node pkg="model_prediction" type="generator.py" name="generator" output="screen" />
 
     <node pkg="model_prediction" type="model_prediction_rate.py" name="predictor" output="screen" >
-        <param name="rate" value="5"/>
-<!--        <param name="command_type" value="std_msgs/Float64"/> -->
+        <param name="rate" value="1000"/>
+<!--        <param name="command_type" value="std_msgs/Float64"/> put the sampling rate to 1/0.001-->
 <!--        <param name="command_field" value="data"/> -->
         <param name="command_type" value="geometry_msgs/Twist"/>
         <param name="command_field" value="linear.x"/>
-        <param name="command_coef_csv" value="-0.006855981,-0.007706878,-0.000896709,0.003763374,-0.000163169,-0.00062885,0.019591075,0.032088271"/>
+        <param name="command_coef_csv" value="-2.25394475e+00,  1.58620643e+00, -4.20275051e-01,  1.11311808e-01,-2.94881950e-02,  7.85435300e-03, -2.20594000e-03,  1.07394900e-03,-2.13458600e-03,  7.63531000e-03, -1.93234400e-02,  1.32932250e-02"/>
 <!--        <param name="state_type" value="std_msgs/Float64"/> -->
 <!--        <param name="state_field" value="data"/> -->
         <param name="state_type" value="geometry_msgs/Twist"/>
         <param name="state_field" value="linear.x"/>
-        <param name="state_coef_csv" value="-2.158249476,1.815187391,-0.670240295,0.092600862,-0.024067159,-0.030477315,0.224484669,-0.310347303,0.249607237,-0.105176084,-0.031316506,0.042628579"/>
+        <param name="state_coef_csv" value="-4.89e-06, -8.15e-06,  2.77e-05, -2.03e-05,  2.71e-06, -6.59e-06, 2.29e-05, -1.36e-05"/>
 
 <!--        <remap from="/predictor/command" to="/command"/> -->
 <!--        <remap from="/predictor/state" to="/state"/> -->
@@ -21,4 +21,3 @@
     </node>
 
 </launch>
-
