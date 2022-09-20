@@ -3,7 +3,7 @@
 
   <node pkg="floor_plane_hough" type="floor_plane_hough" name="floor_plane_hough" output="screen">
       launch-prefix="xterm -e gdb --args"
-      <param name="base_frame" value="/bubbleRob" />
+      <param name="base_frame" value="Hokuyo_sensor" />
       <param name="max_range" value="2.0" />
       <param name="n_a" value="21" />
       <param name="a_min" value="-1.0" />

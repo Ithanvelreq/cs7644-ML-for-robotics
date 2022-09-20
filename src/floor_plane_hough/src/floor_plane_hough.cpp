@@ -70,7 +70,7 @@ class FloorPlaneHough {
             accumulator = 0;
             double delta_a = (a_max - a_min) / ((double) n_a);
             double delta_b = (b_max - b_min) / ((double)n_b);
-            double delta_c = (b_max - b_min) / ((double)n_b);
+            double delta_c = (c_max - c_min) / ((double)n_c);
             for (unsigned int i=0;i<n;i++) {
                 double x = lastpc_[pidx[i]].x;
                 double y = lastpc_[pidx[i]].y;
@@ -82,7 +82,10 @@ class FloorPlaneHough {
                     for(int index_b = 0; index_b<n_b; index_b++){
                         double b = delta_b * index_b + b_min;
                         double c = z - a * x - b * y;
+                        
+
                         int index_c = (int) ((c - c_min) / delta_c);
+                        //ROS_INFO("Value of c = %.2f, Value of index c = %d",c,index_c);
                         accumulator(index_a, index_b, index_c) += 1;
                     }
                     
@@ -96,14 +99,24 @@ class FloorPlaneHough {
             //std::cout << maxIdx[0] << ", " << maxIdx[1] << ", " << maxIdx[2] << std::endl;
             //
 	    //This is the worst implementation possible, please switch to an open cv function
+            int maxAccum = 0;
+            double X[3] = {0,0,0};
             for (int index_a = 0; index_a<n_a; index_a++){
+                double a = delta_a * index_a + a_min;
                 for(int index_b = 0; index_b<n_b; index_b++){
+                    double b = delta_b * index_b + b_min;
                     for(int index_c = 0; index_c < n_c; index_c++){
-
+                        double c = delta_c * index_c + c_min;
+                        if(accumulator(index_a,index_b,index_c) > maxAccum){
+                            maxAccum = accumulator(index_a,index_b,index_c);
+                            X[0] = a;
+                            X[1] = b;
+                            X[2] = c;
+                        }
                     }
                 }
             }
-            double X[3] = {0,0,0};
+            
             // Use the accumulator to find the best plane parameters and store
             // them in X (this will be used for display later)
             // X = {a,b,c}
