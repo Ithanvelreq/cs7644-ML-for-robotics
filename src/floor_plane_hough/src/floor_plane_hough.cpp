@@ -21,7 +21,7 @@ class FloorPlaneHough {
         ros::NodeHandle nh_;
         std::string base_frame_;
         double max_range_;
-
+        int _debug;
         pcl::PointCloud<pcl::PointXYZ> lastpc_;
         cv::Mat_<uint32_t> accumulator;
 
@@ -82,25 +82,20 @@ class FloorPlaneHough {
                     for(int index_b = 0; index_b<n_b; index_b++){
                         double b = delta_b * index_b + b_min;
                         double c = z - a * x - b * y;
-                        
-
                         int index_c = (int) ((c - c_min) / delta_c);
-                        //ROS_INFO("Value of c = %.2f, Value of index c = %d",c,index_c);
                         accumulator(index_a, index_b, index_c) += 1;
+                        if(_debug>1){
+                            ROS_INFO("Value of a=%.2f, b=%.2f, c=%.2f",a, b, c);
+                            ROS_INFO("Accumulatior(%d, %d, %d)=%d",index_a, index_b, index_c, accumulator(index_a, index_b, index_c));
+                        }
                     }
                     
                 }
             }
-            // I don't know if this implementation works!!! But we for sure have to use cv functions
-            //double testMaxval;
-            //int maxIdx[3];
-            //cv::minMaxIdx(accumulator, 0, &testMaxval, 0, maxIdx);
-            //std::cout << testMaxval << std::endl ;
-            //std::cout << maxIdx[0] << ", " << maxIdx[1] << ", " << maxIdx[2] << std::endl;
-            //
-	    //This is the worst implementation possible, please switch to an open cv function
-            int maxAccum = 0;
-            double X[3] = {0,0,0};
+            
+	        //This is the worst implementation possible, please switch to an open cv function
+            long maxAccum = 0;
+            double X[3] = {1,1,1};
             for (int index_a = 0; index_a<n_a; index_a++){
                 double a = delta_a * index_a + a_min;
                 for(int index_b = 0; index_b<n_b; index_b++){
@@ -112,6 +107,9 @@ class FloorPlaneHough {
                             X[0] = a;
                             X[1] = b;
                             X[2] = c;
+                            if(_debug>0){
+                                ROS_INFO("New max found at a=%.2f, b=%.2f, c=%.2f with a score of %ld", X[0], X[1], X[2], maxAccum);
+                            }
                         }
                     }
                 }
@@ -176,6 +174,7 @@ class FloorPlaneHough {
             nh_.param("n_c",n_c,10);
             nh_.param("c_min",c_min,-1.0);
             nh_.param("c_max",c_max,+1.0);
+            nh_.param("debug", _debug, 0);
             assert(n_a > 0);
             assert(n_b > 0);
             assert(n_c > 0);
