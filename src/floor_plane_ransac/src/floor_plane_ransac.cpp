@@ -61,27 +61,56 @@ class FloorPlaneRansac {
             // Remember to use the n_samples and the tolerance variable
             n = pidx.size();
             size_t best = 0;
+            double best_score = 0.0;
             double X[3] = {0,0,0};
+            double a = 0.0;
+            double b = 0.0;
+            double c = 0.0;
             ROS_INFO("%d useful points out of %d",(int)n,(int)temp.size());
             for (unsigned int i=0;i<(unsigned)n_samples;i++) {
                 // Implement RANSAC here. Useful commands:
                 // Select a random number in in [0,i-1]
-                size_t j = std::min((rand() / (double)RAND_MAX) * i,(double)i-1);
+                size_t j1 = std::min((rand() / (double)RAND_MAX) * i,(double)n);
+                size_t j2 = std::min((rand() / (double)RAND_MAX) * i,(double)n);
+                size_t j3 = std::min((rand() / (double)RAND_MAX) * i,(double)n);
                 // Create a 3D point:
                 // Eigen::Vector3f P; P << x,y,z;
-                Eigen::Vector3f P; P << lastpc_[pidx[0]].x, lastpc_[pidx[0]].y, lastpc_[pidx[0]].z; 
+                Eigen::Vector3f P1; P1 << lastpc_[pidx[j1]].x, lastpc_[pidx[j1]].y, lastpc_[pidx[j1]].z; 
+                Eigen::Vector3f P2; P2 << lastpc_[pidx[j2]].x, lastpc_[pidx[j2]].y, lastpc_[pidx[j2]].z; 
+                Eigen::Vector3f P3; P3 << lastpc_[pidx[j3]].x, lastpc_[pidx[j3]].y, lastpc_[pidx[j3]].z; 
                 // Dot product
-                double x = P.dot(P);
+                
                 // Cross product
-                Eigen::Vector3f Q = P.cross(P); 
-                // Vector norm
-                double norm = P.norm();
+                Eigen::Vector3f normal = (P2-P1).cross(P3-P1); 
+                //double x = n.dot(P2-P1);
+                //while()
+                normal = normal/normal.norm();
+                int count = 0;
+                double score = 0.0;
+                double d = -normal(0)*P1(0)-normal(1)*P1(1)-normal(2)*P1(2);
+                for(unsigned int k=0;k<(unsigned)n;k++){
+                    if(lastpc_[pidx[k]].x*normal(0)+lastpc_[pidx[k]].y*normal(1)+lastpc_[pidx[k]].z*normal(2) + d < tolerance){
+                        count++;
+                        score += fabs(lastpc_[pidx[k]].x*normal(0)+lastpc_[pidx[k]].y*normal(1)+lastpc_[pidx[k]].z*normal(2) + d );
+                    }
+                }
+                score += (n-count)*tolerance;
+                if(score > best_score){
+                    a = -normal(0)/normal(2);
+                    b = -normal(1)/normal(2);
+                    c = -d/normal(2);
+
+                }
+
 
             }
             // At the end, make sure to store the best plane estimate in X
             // X = {a,b,c}. This will be used for display
 
             // END OF TODO
+            X[0] = a;
+            X[1] = b;
+            X[2] = c;
             ROS_INFO("Extracted floor plane: z = %.2fx + %.2fy + %.2f",
                     X[0],X[1],X[2]);
 
