@@ -1,10 +1,16 @@
 <launch>
 
-  <node pkg="floor_plane_regression" type="floor_plane_regression" name="floor_plane_regression" output="screen">
+  <node pkg="floor_plane_mapping" type="floor_plane_mapping" name="floor_plane_mapping" output="screen">
       launch-prefix="xterm -e gdb --args"
-      <param name="base_frame" value="Hokuyo_sensor" />
-      <param name="max_range" value="2." />
-
-      <remap from="/floor_plane_regression/scans" to="vrep/twistCommand"/>
+      <param name="base_frame" value="world" />
+      <param name="max_range" value="3." />
+      <param name="out_of_bounds_x" value="5." />
+      <param name="out_of_bounds_y" value="5." />
+      <param name="point_list_max_size" value="1000" />
+      <param name="occupancy_grid_resolution" value=".1" />
+      <param name="traversable_threshold" value=".7" />
+      <param name="real_map_width_meters" value="10.1" />
+      <param name="real_map_height_meters" value="10.1" />
+      <remap from="/floor_plane_mapping/scans" to="/depth_registered/points"/>
   </node>
 </launch>

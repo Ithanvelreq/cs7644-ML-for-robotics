@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(floor_plane_regression)
+project(floor_plane_mapping)
 
 add_compile_options(-std=c++14 -g -ggdb -Wall -O3)
 ## Find catkin macros and libraries
@@ -51,7 +51,7 @@ find_package(catkin REQUIRED COMPONENTS pcl_ros roscpp sensor_msgs tf visualizat
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES floor_plane_regression
+#  LIBRARIES floor_plane_mapping
   CATKIN_DEPENDS pcl_ros roscpp sensor_msgs tf visualization_msgs
   message_runtime
 #  DEPENDS system_lib
@@ -80,19 +80,19 @@ include_directories(
 )
 
 ## Declare a cpp library
-# add_library(floor_plane_regression
-#   src/${PROJECT_NAME}/floor_plane_regression.cpp
+# add_library(floor_plane_mapping
+#   src/${PROJECT_NAME}/floor_plane_mapping.cpp
 # )
 
 ## Declare a cpp executable
-add_executable(floor_plane_regression src/floor_plane_regression.cpp)
+add_executable(floor_plane_mapping src/floor_plane_mapping.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(floor_plane_regression_node floor_plane_regression_generate_messages_cpp)
+# add_dependencies(floor_plane_mapping_node floor_plane_mapping_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(floor_plane_regression
+target_link_libraries(floor_plane_mapping
   ${catkin_LIBRARIES}
 )
 
@@ -111,7 +111,7 @@ target_link_libraries(floor_plane_regression
 # )
 
 ## Mark executables and/or libraries for installation
-install(TARGETS floor_plane_regression 
+install(TARGETS floor_plane_mapping 
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -136,7 +136,7 @@ install(TARGETS floor_plane_regression
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_floor_plane_regression.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_floor_plane_mapping.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

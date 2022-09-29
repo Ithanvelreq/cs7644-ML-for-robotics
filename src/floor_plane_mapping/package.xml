@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>floor_plane_regression</name>
+  <name>floor_plane_mapping</name>
   <version>0.1.0</version>
-  <description>The floor_plane_regression package</description>
+  <description>The floor_plane_mapping package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but mutiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://ros.org/wiki/floor_plane_regression</url> -->
+  <!-- <url type="website">http://ros.org/wiki/floor_plane_mapping</url> -->
 
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
