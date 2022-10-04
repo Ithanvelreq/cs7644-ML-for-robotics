@@ -1,0 +1,34 @@
+<launch>
+  <node pkg="floor_plane_mapping" type="cylinder_detection" name="cylinder_detection" output="screen">
+      launch-prefix="xterm -e gdb --args"
+      <param name="base_frame" value="world" />
+      <param name="max_range" value="2.0" />
+      <param name="out_of_bounds_x" value="5." />
+      <param name="out_of_bounds_y" value="5." />
+      <param name="n_cx" value="50" />
+      <param name="cx_min" value="-5.0" />
+      <param name="cx_max" value="5.0" />
+      <param name="n_cy" value="50" />
+      <param name="cy_min" value="-5.0" />
+      <param name="cy_max" value="5.0" />
+      <param name="n_r" value="100" />
+      <param name="r_min" value="0" />
+      <param name="r_max" value="1" />
+      <param name="min_votes" value="100000000" />
+      <param name="debug" value="0" />
+      <remap from="/cylinder_detection/scans" to="/depth_registered/points"/>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="nodelet_manager" output="screen" respawn="false" args="manager"/>
+
+  <node pkg="nodelet" type="nodelet" name="depth_to_pc" args="load depth_image_proc/point_cloud_xyzrgb nodelet_manager" respawn="false">
+    <remap from="rgb/image_rect_color" to="/vrep/visionSensor"/>
+    <remap from="depth_registered/image_rect" to="/vrep/depthSensor_flipped"/>
+    <remap from="rgb/camera_info" to="/vrep/visionSensorInfo"/>
+  </node>
+
+
+  <node pkg="vrep4_helpers" type="image_flip" name="image_flip" output="screen">
+      <remap from="image" to="/vrep/depthSensor"/>
+      <remap from="image_flipped" to="/vrep/depthSensor_flipped"/>
+  </node>
+</launch>

@@ -6,7 +6,7 @@ add_compile_options(-std=c++14 -g -ggdb -Wall -O3)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS pcl_ros roscpp sensor_msgs tf visualization_msgs message_generation)
-
+find_package(OpenCV REQUIRED)
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -86,6 +86,7 @@ include_directories(
 
 ## Declare a cpp executable
 add_executable(floor_plane_mapping src/floor_plane_mapping.cpp)
+add_executable(cylinder_detection src/cylinder_detection.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -93,7 +94,10 @@ add_executable(floor_plane_mapping src/floor_plane_mapping.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(floor_plane_mapping
-  ${catkin_LIBRARIES}
+  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
+)
+target_link_libraries(cylinder_detection
+  ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
 )
 
 #############
