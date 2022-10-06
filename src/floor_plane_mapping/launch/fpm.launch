@@ -2,6 +2,7 @@
 
   <node pkg="floor_plane_mapping" type="floor_plane_mapping" name="floor_plane_mapping" output="screen">
       launch-prefix="xterm -e gdb --args"
+      <param name="bayesian_filter" value="1" />
       <param name="base_frame" value="world" />
       <param name="max_range" value="3." />
       <param name="out_of_bounds_x" value="5." />
@@ -12,5 +13,16 @@
       <param name="real_map_width_meters" value="10.1" />
       <param name="real_map_height_meters" value="10.1" />
       <remap from="/floor_plane_mapping/scans" to="/depth_registered/points"/>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="nodelet_manager" output="screen" respawn="false" args="manager"/>
+
+  <node pkg="nodelet" type="nodelet" name="depth_to_pc" args="load depth_image_proc/point_cloud_xyzrgb nodelet_manager" respawn="false">
+    <remap from="rgb/image_rect_color" to="/vrep/visionSensor"/>
+    <remap from="depth_registered/image_rect" to="/vrep/depthSensor_flipped"/>
+    <remap from="rgb/camera_info" to="/vrep/visionSensorInfo"/>
+  </node>
+  <node pkg="vrep4_helpers" type="image_flip" name="image_flip" output="screen">
+      <remap from="image" to="/vrep/depthSensor"/>
+      <remap from="image_flipped" to="/vrep/depthSensor_flipped"/>
   </node>
 </launch>

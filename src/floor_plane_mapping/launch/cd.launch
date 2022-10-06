@@ -2,7 +2,7 @@
   <node pkg="floor_plane_mapping" type="cylinder_detection" name="cylinder_detection" output="screen">
       launch-prefix="xterm -e gdb --args"
       <param name="base_frame" value="world" />
-      <param name="max_range" value="2.0" />
+      <param name="max_range" value="1.0" />
       <param name="out_of_bounds_x" value="5." />
       <param name="out_of_bounds_y" value="5." />
       <param name="n_cx" value="50" />
@@ -11,10 +11,10 @@
       <param name="n_cy" value="50" />
       <param name="cy_min" value="-5.0" />
       <param name="cy_max" value="5.0" />
-      <param name="n_r" value="100" />
+      <param name="n_r" value="70" />
       <param name="r_min" value="0" />
       <param name="r_max" value="1" />
-      <param name="min_votes" value="100000000" />
+      <param name="min_votes" value="30000000" />
       <param name="debug" value="0" />
       <remap from="/cylinder_detection/scans" to="/depth_registered/points"/>
   </node>

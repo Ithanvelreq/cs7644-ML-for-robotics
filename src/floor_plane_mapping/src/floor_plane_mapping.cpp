@@ -9,6 +9,7 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <Eigen/Core>
 #include <Eigen/Cholesky>
+#include <opencv2/opencv.hpp>
 
 typedef std::pair<int,int> Coordinate;
 typedef std::vector<pcl::PointXYZ> PointList;
@@ -19,6 +20,7 @@ class FloorPlaneMapping {
         ros::Subscriber scan_sub_;
         ros::Publisher occupancy_grid_pub_;
         tf::TransformListener listener_;
+        int bayesian_filter_;
 
         ros::NodeHandle nh_;
         std::string base_frame_;
@@ -36,9 +38,12 @@ class FloorPlaneMapping {
         pcl::PointCloud<pcl::PointXYZ> lastpc2_;
         nav_msgs::OccupancyGrid occupancy_grid;
 
+        cv::Mat_<double> PTxy;
+        double DKnowingTxy [2][2] = {{0.9, 0.1}, {0.1, 0.9}};
+
     protected: // ROS Callbacks
 
-        bool isTraversable(PointList pointList){
+        bool isTraversableNaive(PointList pointList){
             int n = pointList.size();
             Eigen::MatrixXf A(n,3);
             Eigen::MatrixXf B(n,1);
@@ -60,6 +65,16 @@ class FloorPlaneMapping {
             double acute_angle_cosine = std::abs((1.0)/std::sqrt(X(0)*X(0) + X(1)*X(1) + 1));
             //ROS_INFO("The slope of the floor plane is: %f", acute_angle);
             return acute_angle_cosine > traversable_threshold_;
+        }
+
+        int isTraversableBayesian(PointList pointList, int i, int j){
+            int D = isTraversableNaive(pointList);
+            int Txy = PTxy(i, j)>=0.5?1:0;
+            double Txy1KnowingD = (DKnowingTxy[D][Txy] * PTxy(i, j)) / (DKnowingTxy[D][1]*PTxy(i, j) + DKnowingTxy[D][0]*(1.0-PTxy(i, j)));
+            ROS_INFO("DKnowingTxy[D][1] = %.5f, PTxy(i, j)=%.5f, DKnowingTxy[D][0]=%.5f", DKnowingTxy[D][1], PTxy(i, j), DKnowingTxy[D][0]);
+            ROS_INFO("D = %d, Txy = %d, Txy1KnowingD=%.5f", D, Txy, Txy1KnowingD);
+            PTxy(i, j) = Txy1KnowingD;
+            return 100 - (int) (Txy1KnowingD*100);
         }
 
         void pc_callback(const sensor_msgs::PointCloud2ConstPtr msg) {
@@ -118,13 +133,18 @@ class FloorPlaneMapping {
                 if (pl.empty()) {
                     continue;
                 }
-                bool traversable = isTraversable(pl);
                 int i = C.first + occupancy_grid_width_/2;
                 int j = C.second + occupancy_grid_height_/2;
                 if ((i < 0) || (j<0) || (i>=occupancy_grid_width_) || (j>=occupancy_grid_height_)) {
                     continue;
                 }
-                occupancy_grid.data[j*occupancy_grid_height_ + i] = traversable?100:0;
+                if(bayesian_filter_){
+                    int traversable = isTraversableBayesian(pl, i, j);
+                    occupancy_grid.data[j*occupancy_grid_height_ + i] = traversable;
+                }else{
+                    bool traversable = isTraversableNaive(pl);
+                    occupancy_grid.data[j*occupancy_grid_height_ + i] = traversable?0:100;
+                }
             }
             occupancy_grid_pub_.publish(occupancy_grid);
         }
@@ -139,6 +159,7 @@ class FloorPlaneMapping {
             // This parameter defines the maximum range at which we want to
             // consider points. Experiment with the value in the launch file to
             // find something relevant.
+            nh_.param("bayesian_filter",bayesian_filter_,1);
             nh_.param("max_range",max_range_,5.0);
             nh_.param("out_of_bounds_x", out_of_bounds_x_, 5.0);
             nh_.param("out_of_bounds_y", out_of_bounds_y_, 5.0);
@@ -166,6 +187,10 @@ class FloorPlaneMapping {
             occupancy_grid.info.origin.orientation.y = 0;
             occupancy_grid.info.origin.orientation.z = 0;
             occupancy_grid.data.assign((int)(occupancy_grid_width_*occupancy_grid_height_),50);
+
+            int dims[2] = {occupancy_grid_width_, occupancy_grid_height_};
+            PTxy = cv::Mat_<double>(2,dims);
+            PTxy = 0.5;
 
             // Subscribe to the point cloud and prepare the marker publisher
             scan_sub_ = nh_.subscribe("scans",1,&FloorPlaneMapping::pc_callback,this);

@@ -82,7 +82,7 @@ class CylinderDetection {
             
             //
             // BEGIN TODO
-            // Finding planes: r^2 = (x - cx)^2 + (y - cy)^2 using the hough transform
+            // r^2 = (x - cx)^2 + (y - cy)^2 using the hough transform
             // Remember to use the cx_min,cx_max,n_cx_ variables (resp. b, c).
             n = pidx.size();
             ROS_INFO("%d useful points out of %d",(int)n,(int)temp.size());
