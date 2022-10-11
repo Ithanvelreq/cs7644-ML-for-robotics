@@ -26,7 +26,7 @@ class CylinderDetection {
         int _debug;
         pcl::PointCloud<pcl::PointXYZ> lastpc_;
         pcl::PointCloud<pcl::PointXYZ> lastpc2_;
-        cv::Mat_<uint32_t> accumulator;
+        cv::Mat_<int> accumulator;
         std::set<std::string> cylindersFound_;
         int min_votes_;
         double out_of_bounds_x_;
@@ -91,32 +91,28 @@ class CylinderDetection {
             double delta_cx = (double) (cx_max - cx_min) / ((double) n_cx_);
             double delta_cy = (double) (cy_max - cy_min) / ((double)n_cy_);
             double delta_r = (r_max - r_min) / ((double)n_r_);
-            if(_debug>0){
-                ROS_INFO("delta_cx=%.5f, delta_cy=%.5f, delta_r=%.5f", delta_cx, delta_cy, delta_r);
-            }
             for (unsigned int i=0;i<n;i++) {
                 double x = lastpc_[pidx[i]].x;
                 double y = lastpc_[pidx[i]].y;
-                // Update the accumulator based on current point here
-                // individual cells in the accumulator can be accessed as follows
-                for (int index_cx = 0; index_cx<n_cx_; index_cx++){
-                    double cx = delta_cx * index_cx + cx_min;
+                for(int index_cx = 0; index_cx < n_cx_; index_cx++){
+                    double cx = delta_cx * ((double) index_cx) + cx_min;
                     for(int index_cy = 0; index_cy<n_cy_; index_cy++){
-                        double cy = delta_cy * index_cy + cy_min;
+                        double cy = delta_cy * ((double) index_cy) + cy_min;
                         double r = std::sqrt((x - cx)*(x - cx) + (y - cy)*(y - cy)) ;
                         int index_r = (int) ((r - r_min) / delta_r);
+                        //ROS_INFO("Values cx=%.2f, cy=%.2f, r=%.2f", cx, cy, r);
+                        //ROS_INFO("Indices cx=%d, cy=%d, r=%d", index_cx, index_cy, index_r);
                         if(index_r < n_r_ && index_r >=0 ){
-                            accumulator(index_cx, index_cy, index_r) += 1;
-                            if(_debug>0){
-                                //ROS_INFO("Voting for cx=%.2f, cy=%.2f, r=%.2f", cx, cy, r);
+                            accumulator(index_cx, index_cy, index_r) = accumulator(index_cx, index_cy, index_r) +  1;
+                            if(accumulator(index_cx, index_cy, index_r) > n){
+                                ROS_INFO("Too many votes with %u votes", accumulator(index_cx, index_cy, index_r));
+                                exit(1);
                             }
                         }
                     }
-                    
                 }
             }
             
-	        //This is the worst implementation possible, please switch to an open cv function
             long maxAccum = 0;
             double X[3] = {1,1,1};
             std::string parametersKey = "";
@@ -161,8 +157,8 @@ class CylinderDetection {
                 m.pose.orientation.y = 0;
                 m.pose.orientation.z = 0;
                 m.pose.orientation.w = 1;
-                m.scale.x = X[2];
-                m.scale.y = X[2];
+                m.scale.x = X[2]*2;
+                m.scale.y = X[2]*2;
                 m.scale.z = 3;
                 m.color.a = 0.5;
                 m.color.r = 1.0;
@@ -202,7 +198,7 @@ class CylinderDetection {
 
             // the accumulator is created here as a 3D matrix of size n_cx_ x n_cy_ x n_c
             int dims[3] = {n_cx_,n_cy_,n_r_};
-            accumulator = cv::Mat_<uint32_t>(3,dims);
+            accumulator = cv::Mat_<int>(3,dims);
             
             // BEGIN TODO
 
