@@ -4,6 +4,7 @@ project(floor_plane_deep)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+add_compile_options(-g -ggdb -Wall -O0)
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   pcl_ros

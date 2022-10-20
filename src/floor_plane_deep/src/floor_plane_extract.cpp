@@ -88,7 +88,10 @@ class FloorPlaneExtract {
                     }
                 }
             }
-            double purity = std::max(traversablePixels, untraversablePixels) / (traversablePixels + untraversablePixels);
+            if(traversablePixels == 0 && untraversablePixels == 0){
+                return UNUSABLE;
+            }
+            double purity = std::max(traversablePixels, untraversablePixels) / (double) (traversablePixels + untraversablePixels);
             if(purity < purity_threshold_){
                 return UNUSABLE;
             }

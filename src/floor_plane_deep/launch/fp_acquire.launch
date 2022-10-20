@@ -6,18 +6,29 @@
       <param name="base_frame" value="/bubbleRob" />
       <param name="max_range" value="3.0" />
       <param name="thumb_size" value="32" />
-      <param name="out_dir" value="/tmp" />
+      <param name="out_dir" value="/home/GTL/ivelarde/deep/" />
       <param name="height_threshold" value="0.05" />
       <param name="min_displacement" value="0.1" />
       <param name="min_rotation" value="0.1" />
       <param name="max_image_per_type" value="4000" />
       <param name="joystick_button" value="3" />
-      <param name="traversability_threshold" value=".1" />
-      <param name="purity_threshold" value=".75" />
+      <param name="traversability_threshold" value=".01" />
+      <param name="purity_threshold" value=".50" />
 
       <remap from="/floor_plane_extract/pointcloud" to="/depth_registered/points"/>
       <remap from="/floor_plane_extract/image" to="/vrep/visionSensor"/>
       <remap from="/floor_plane_extract/info" to="/vrep/visionSensorInfo"/>
       <remap from="/floor_plane_extract/joy" to="/joy"/>
+  </node>
+  <node pkg="nodelet" type="nodelet" name="nodelet_manager" output="screen" respawn="false" args="manager"/>
+
+  <node pkg="nodelet" type="nodelet" name="depth_to_pc" args="load depth_image_proc/point_cloud_xyzrgb nodelet_manager" respawn="false">
+    <remap from="rgb/image_rect_color" to="/vrep/visionSensor"/>
+    <remap from="depth_registered/image_rect" to="/vrep/depthSensor_flipped"/>
+    <remap from="rgb/camera_info" to="/vrep/visionSensorInfo"/>
+  </node>
+  <node pkg="vrep4_helpers" type="image_flip" name="image_flip" output="screen">
+      <remap from="image" to="/vrep/depthSensor"/>
+      <remap from="image_flipped" to="/vrep/depthSensor_flipped"/>
   </node>
 </launch>

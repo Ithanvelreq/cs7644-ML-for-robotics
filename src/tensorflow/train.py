@@ -42,6 +42,7 @@ class Train:
         self.val_accuracy_metric.update_state(y, pred)
 
     def train(self):
+        print("Launching training")
         best_acc = 10000
         self.train_writer = tf.summary.create_file_writer(self.settings.tensorboard_dir+'/train')
         self.val_writer = tf.summary.create_file_writer(self.settings.tensorboard_dir+'/val')

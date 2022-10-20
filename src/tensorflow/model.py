@@ -36,8 +36,8 @@ class CNNModel(Model):
         cv2 = self.conv2(nm1)
         nm2 = self.norm2(cv2, training=training)
         cv3 = self.conv3(nm2)
-        fl = self.flat(cv1)
+        fl = self.flat(cv3)
         dn1 = self.dense1(fl)
         dr1 = self.drop1(dn1, training=training)
         dn2 = self.y_(dr1)
-        return dn1
+        return dn2
