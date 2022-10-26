@@ -37,7 +37,7 @@ class FloorPlaneClassifier:
         # Calls the network
         checked = self.check_thumb(batch)
         # Transforms the array into low resolution image (on pixel per thumbnail)
-        low_res = np.reshape(checked,[data.height/self.ts_,data.width/self.ts_,3])
+        low_res = np.reshape(checked,[int(data.height/self.ts_), int(data.width/self.ts_), 3])
         # Upsamples the predictions so they have the same size as the input image
         classified = cv2.resize(low_res,(0,0),fx=self.ts_,fy=self.ts_, interpolation=cv2.INTER_NEAREST).astype(np.uint8)
         overlay = cv2.addWeighted(img, 0.5, classified, 0.5, 0)
@@ -48,12 +48,13 @@ class FloorPlaneClassifier:
 
     def check_thumb(self, batch):
         # Run the network
-        res = self.model(batch, training=False)[0]
+        res = self.model(tf.cast(batch, tf.float32), training=False)
         # Makes sure that the output has the proper shape
         assert(res[0].shape[0] == 2)
+        print(res)
         #TODO : Use network output to determine traversability (idealy levaraging vector-wise operation in numpy)
         # Returns a numpy array of dimension [res.shape[0],3]
-        return array
+        return np.ones((res.shape[0], 3))
            
 if __name__ == '__main__':
     rospy.init_node('floor_plane_classifier')
