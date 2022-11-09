@@ -26,6 +26,17 @@ class FloorPlaneClassifier:
         # Loads the model
         self.model = tf.keras.models.load_model(self.model_dir_)
 
+    def reshape_split(self, image, kernel_size):
+        img_height, img_width, channels = image.shape
+        tile_heigth, tile_width = kernel_size
+        tiled_array = image.reshape(img_height // tile_heigth,
+                                    tile_heigth,
+                                    img_width // tile_width,
+                                    tile_width,
+                                    channels)
+        tiled_array = tiled_array.swapaxes(1, 2)
+        return tiled_array.reshape(-1, self.ts_, self.ts_, 3)
+
     def image_callback(self, data):
         # Gets the image, check that it is square and divisible by the thumbnail size
         assert(data.height == data.width)
@@ -33,7 +44,7 @@ class FloorPlaneClassifier:
         # Convert to np array
         img = self.bridge.imgmsg_to_cv2(data,"bgr8")
         # Reshape the image as a batch of thumbnails (faster processing when using batches)
-        batch = np.reshape(np.array(np.split(np.array(np.split(img,self.ts_)),self.ts_)), [-1,self.ts_,self.ts_,3])
+        batch = self.reshape_split(img, (self.ts_, self.ts_))
         # Calls the network
         checked = self.check_thumb(batch)
         # Transforms the array into low resolution image (on pixel per thumbnail)
@@ -51,10 +62,11 @@ class FloorPlaneClassifier:
         res = self.model(tf.cast(batch, tf.float32), training=False)
         # Makes sure that the output has the proper shape
         assert(res[0].shape[0] == 2)
-        print(res)
-        #TODO : Use network output to determine traversability (idealy levaraging vector-wise operation in numpy)
-        # Returns a numpy array of dimension [res.shape[0],3]
-        return np.ones((res.shape[0], 3))
+        answer = np.zeros((res.shape[0], 3))
+        predicted = np.argmax(res, axis=1)
+        answer[predicted==0, 0] = 255
+        answer[predicted==1, 1] = 255
+        return answer
            
 if __name__ == '__main__':
     rospy.init_node('floor_plane_classifier')

@@ -1,0 +1,1 @@
+python3   train.py --val_file ~/deep/shore/fourth_val/labels.txt --train_file ~/deep/shore/fourth_train/labels.txt --train_root ~/deep/shore/fourth_train/ --val_root ~/deep/shore/fourth_val/ --learning_rate 1e-3 --batch_size 100 --iter 1000 --dropout 0.1 --classes 3 --output ~/deep/shore/out4

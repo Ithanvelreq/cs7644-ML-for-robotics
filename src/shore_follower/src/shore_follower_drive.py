@@ -26,7 +26,7 @@ class ShoreFollowerDrive:
 
     def load_model(self):
         # Loads the model
-        self.model = tf.keras.models.load_model(self.model_dir)
+        self.model = tf.keras.models.load_model(self.model_dir_)
 
     def image_callback(self, data):
         # Image call back and resize to proper shape
@@ -39,12 +39,21 @@ class ShoreFollowerDrive:
         # Reads the image, feed it to the network, get the predictions and act on it.
         out = Twist()
         # Runs the network
-        res = self.model(img, training=False)[0]
+        res = self.model(tf.cast(img, tf.float32), training=False)[0]
         # Makes sure that the shape of the network matches the required shape
         assert(res.shape[0] == 3)
         print("%5.2f %5.2f %5.2f" %(res[0],res[1],res[2]))
         #TODO: Use the network output so the robot can drive around the lake
         # returns a geometry_msgs.Twist
+        res = tf.math.argmax(res)
+        if res == 1:
+            out.linear.x = 1
+        elif res == 0:
+            out.linear.x = .5
+            out.angular.z = 1
+        elif res == 2:
+            out.linear.x = .5
+            out.angular.z = -1
         return out
 
 if __name__ == '__main__':
